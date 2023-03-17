@@ -1,8 +1,9 @@
-import { marked, nunjucks, parseHTML } from "../deps.ts";
+import { env as dotenv, marked, nunjucks, parseHTML } from "../deps.ts";
 import { markdown } from "../mod.ts";
 
+const isDev = dotenv.MODE === "dev";
 // Configure Nunjucks and get the environment.
-const env = nunjucks.configure("pages", { autoescape: true });
+const env = nunjucks.configure("pages", { autoescape: true, noCache: isDev });
 
 // Add the markdown extension.
 env.addExtension("markdown", new markdown(env, marked));

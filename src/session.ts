@@ -1,5 +1,5 @@
-import { env, MongoStore, Session } from "./deps.ts";
-import { getDb } from "./mod.ts";
+import { env, MongoStore, Session } from "../deps.ts";
+import { getDb } from "../mod.ts";
 
 const db = await getDb();
 const store = new MongoStore(db, "zenjs_sessions");

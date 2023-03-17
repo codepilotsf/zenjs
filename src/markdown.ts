@@ -1,6 +1,6 @@
 // Ported from: https://www.npmjs.com/package/nunjucks-markdown
 
-import { nunjucks } from "./deps.ts";
+import { nunjucks } from "../deps.ts";
 
 export function markdown(env, renderMarkdown) {
   this.tags = ["markdown"];

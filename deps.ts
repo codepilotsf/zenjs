@@ -1,5 +1,3 @@
-export { Application, Router } from "https://deno.land/x/oak@v11.1.0/mod.ts";
-export { default as staticFiles } from "https://deno.land/x/static_files@1.1.6/mod.ts";
 export { expandGlob } from "https://deno.land/std/fs/mod.ts";
 export {
   MongoStore,
@@ -19,7 +17,7 @@ export {
   ObjectId,
 } from "https://deno.land/x/mongo@v0.31.1/mod.ts";
 export { setup } from "https://esm.sh/twind@0.16.19";
-export * as twcolors from "https://esm.sh/twind@0.16.19/colors";
+export * as twColors from "https://esm.sh/twind@0.16.19/colors";
 export { EventEmitter } from "https://deno.land/std@0.177.0/node/events.ts";
 export {
   getStyleTag,

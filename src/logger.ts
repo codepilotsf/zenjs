@@ -1,4 +1,4 @@
-import { colors, log } from "./deps.ts";
+import { colors, log } from "../deps.ts";
 
 // custom configuration with 2 loggers (the default and `tasks` loggers)
 await log.setup({

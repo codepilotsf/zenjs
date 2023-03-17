@@ -1,5 +1,5 @@
-import { env, MongoClient } from "./deps.ts";
-import { logger } from "./mod.ts";
+import { env, MongoClient } from "../deps.ts";
+import { logger } from "../mod.ts";
 
 let db;
 

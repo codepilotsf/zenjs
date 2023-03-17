@@ -1,5 +1,5 @@
-import { marked, nunjucks, parseHTML } from "./deps.ts";
-import { markdown } from "./mod.ts";
+import { marked, nunjucks, parseHTML } from "../deps.ts";
+import { markdown } from "../mod.ts";
 
 // Configure Nunjucks and get the environment.
 const env = nunjucks.configure("pages", { autoescape: true });

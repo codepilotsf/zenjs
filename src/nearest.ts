@@ -1,4 +1,4 @@
-import { path } from "./deps.ts";
+import { path } from "../deps.ts";
 
 const routesDir = path.join(Deno.cwd(), "routes");
 

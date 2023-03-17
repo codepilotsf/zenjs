@@ -2,8 +2,8 @@
 
 // Note: considered this one too: https://docs.superstructjs.org
 
-import { ObjectId } from "./deps.ts";
-import { getDb, logger, validator } from "./mod.ts";
+import { ObjectId } from "../deps.ts";
+import { getDb, logger, validator } from "../mod.ts";
 
 const db = await getDb();
 

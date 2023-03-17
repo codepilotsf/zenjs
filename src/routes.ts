@@ -1,9 +1,7 @@
 // deno-lint-ignore-file no-explicit-any
 
-import { env, expandGlob, path, Router } from "./deps.ts";
-import { parseHTML } from "./deps.ts";
-import { logger } from "./logger.ts";
-import { getActionCtx, getInitCtx, reloadEmitter } from "./mod.ts";
+import { env, expandGlob, parseHTML, path } from "../deps.ts";
+import { getActionCtx, getInitCtx, logger, reloadEmitter } from "../mod.ts";
 
 // Cache pages, actions, and errors (not used for dev mode).
 const pagesCache: Map<string, { [k: string]: string }> = new Map();
@@ -16,8 +14,11 @@ const actionsDir = path.join(Deno.cwd(), "actions");
 
 let noCache = 0;
 
-export function getRoutes() {
-  return env.MODE === "dev" ? getRoutesFromFiles() : getRoutesFromCache();
+export function getRoutes(Router: any) {
+  const router = new Router();
+  return env.MODE === "dev"
+    ? getRoutesFromFiles(router)
+    : getRoutesFromCache(router);
 }
 
 export async function getErrorTemplate(
@@ -54,15 +55,12 @@ export async function getErrorTemplate(
 ////////////////////////////////////////////////////////////////
 
 // Build live routes for pages and actions on demand for each request (for dev mode).
-function getRoutesFromFiles() {
-  const router = new Router();
-
+function getRoutesFromFiles(router) {
   // ## PAGES ##
 
   // Create route for on demand pages.
   router.get("(.*)", async (context, next) => {
     const pathname = context.request.url.pathname;
-    context.params = { foo: "bar" };
 
     // If any part of path starts with "_", skip it.
     const isHidden = pathname.split("/").filter((f) =>
@@ -156,9 +154,7 @@ function getRoutesFromFiles() {
 }
 
 // Return routes for pages and actions cached at server start time (for non-dev mode).
-async function getRoutesFromCache() {
-  const router = new Router();
-
+async function getRoutesFromCache(router) {
   // For all other enviroments cache: pagesPaths, errorsPaths, and actionsPaths.
   const pagesAndErrorsPaths = await listPathsInDir(pagesDir, ".njk");
   const { pagesPaths, errorsPaths } = splitPagesAndErrors(pagesAndErrorsPaths);
@@ -361,10 +357,8 @@ async function getInitFunction(templateString: string) {
   // Parse Dom and find tags with z-init attribute.
   const dom = parseHTML(templateString);
   const initTags = dom["document"]?.querySelectorAll("[z-init]");
-
   // Default init function that just renders the page.
   const defaultInitFunction = (ctx) => ctx.render();
-
   // If no init tags, return default init function.
   if (!initTags || initTags.length < 1) return defaultInitFunction;
 
@@ -388,16 +382,22 @@ async function getInitFunction(templateString: string) {
 
   // If this is dev mode, find init function in actions/ dir.
   if (env.MODE === "dev") {
-    const actionsModulePath = path.join(actionsDir, actionsModuleName + ".ts");
+    noCache++;
+    const actionsModulePath = path.join(
+      actionsDir,
+      actionsModuleName + `.ts?no-cache=${noCache}`,
+    );
     let actionsModuleObject;
     try {
-      noCache++;
-      actionsModuleObject = await import(
-        `${actionsModulePath}?no-cache=${noCache}`
-      );
+      actionsModuleObject = await import(actionsModulePath);
       actionsModuleObject = actionsModuleObject.default; // actions modules always export default.
-    } catch (_) { /* Eat the error */ }
-    if (!actionsModulePath) return defaultInitFunction;
+    } catch (error) {
+      // Don't eat this error!
+      logger.error(
+        `Template contains [z-init="${zInitValue}"] but actions/${actionsModuleName}.ts failed to import\n\n${error.stack}`,
+      );
+    }
+    if (!actionsModuleObject) return defaultInitFunction;
 
     // If no init function exists in actionsModuleObject, log error and return default init function.
     if (!actionsModuleObject[initMethodName]) {

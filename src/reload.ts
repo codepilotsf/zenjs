@@ -1,4 +1,4 @@
-import { EventEmitter } from "./deps.ts";
+import { EventEmitter } from "../deps.ts";
 export const reloadEmitter = new EventEmitter();
 
 let timer;

@@ -1,6 +1,6 @@
 /** Generate a 404/500 page using nearest 404/500 template for this request. */
 
-import { getErrorTemplate, getInitCtx, logger, parseTemplate } from "./mod.ts";
+import { getErrorTemplate, getInitCtx, logger, parseTemplate } from "../mod.ts";
 
 export async function error404(context) {
   const templateString = await getErrorTemplate(

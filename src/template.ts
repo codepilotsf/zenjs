@@ -1,4 +1,4 @@
-import { parseLocals, parseModifiers, parseTwind } from "./mod.ts";
+import { parseLocals, parseModifiers, parseTwind } from "../mod.ts";
 
 export function parseTemplate(template, ctx) {
   let dom;

@@ -1,5 +1,5 @@
-import { env } from "./deps.ts";
-import { getErrorTemplate, logger, parseTemplate } from "./mod.ts";
+import { env } from "../deps.ts";
+import { getErrorTemplate, logger, parseTemplate } from "../mod.ts";
 
 export function getInitCtx(context, page) {
   // Create plain objects for $meta.query and $meta.headers.

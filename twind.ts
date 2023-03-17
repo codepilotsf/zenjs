@@ -1,17 +1,9 @@
 import { getStyleTag, setup, shim, virtualSheet } from "./deps.ts";
+import { getConfig } from "./mod.ts";
 
-const twConfig = await getTwindConfig();
+const { tailwindConfig } = await getConfig();
 const sheet = virtualSheet();
-setup({ ...twConfig, sheet });
-
-async function getTwindConfig() {
-  try {
-    const twConfigModule = await import("../twind.config.ts");
-    return twConfigModule.default;
-  } catch (error) {
-    console.log("Failed to parse twind.json:", error);
-  }
-}
+setup({ ...tailwindConfig, sheet });
 
 export function parseTwind(dom) {
   sheet.reset();

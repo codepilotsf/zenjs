@@ -12,4 +12,5 @@ export { parseTemplate } from "./template.ts";
 export { parseTwind } from "./twind.ts";
 export { reload, reloadEmitter } from "./reload.ts";
 export { session } from "./session.ts";
+export { getConfig, setConfig } from "./config.ts";
 export { validator } from "./validator.ts";

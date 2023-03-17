@@ -117,7 +117,9 @@ function getRoutesFromFiles(router) {
     const actionsAbsPath = path.join(actionsDir, relativePath);
     let actionsModule;
     try {
-      actionsModule = await import(`${actionsAbsPath}?nocache=${noCache}`);
+      const importPathToActionsModule =
+        `file://${actionsAbsPath}?nocache=${noCache}`;
+      actionsModule = await import(importPathToActionsModule);
     } catch (_) {
       logger.error("No actions module found at: /" + actionsAbsPath);
       ctx.ignore();
@@ -163,7 +165,7 @@ async function getRoutesFromCache(router) {
   // For each actionPath, add an entry to actionsCache. (do this before pagePaths so init actions are available)
   for (const actionsPath of actionsPaths) {
     const actionsModule = actionsPath.replace(actionsDir, "").slice(1, -3); // ex: "about-us/history"
-    const actionsModuleDefault = await import(actionsPath);
+    const actionsModuleDefault = await import("file://" + actionsPath);
     const actionsModuleObject = actionsModuleDefault.default;
     actionsCache.set(actionsModule, actionsModuleObject);
 
@@ -389,7 +391,7 @@ async function getInitFunction(templateString: string) {
     );
     let actionsModuleObject;
     try {
-      actionsModuleObject = await import(actionsModulePath);
+      actionsModuleObject = await import("file://" + actionsModulePath);
       actionsModuleObject = actionsModuleObject.default; // actions modules always export default.
     } catch (error) {
       // Don't eat this error!

@@ -10,7 +10,8 @@ env.addExtension("markdown", new markdown(env, marked));
 // Add custom Nunjucks filters here if there's a top-level file called nunjucks.ts.
 let extendNunjucks;
 try {
-  extendNunjucks = (await import(Deno.cwd() + "/nunjucks.ts")).extendNunjucks;
+  const pathToNunjucks = "file://" + Deno.cwd() + "/nunjucks.ts";
+  extendNunjucks = (await import(pathToNunjucks)).extendNunjucks;
   extendNunjucks(env);
 } catch (_) { /* ignore */ }
 

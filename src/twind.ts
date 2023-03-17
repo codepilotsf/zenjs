@@ -2,10 +2,6 @@ import { getStyleTag, setup, shim, twColors, virtualSheet } from "../deps.ts";
 
 // Todo: wrap in try/catch
 const pathToTwindConfig = "file://" + Deno.cwd() + "/twind.config.ts";
-// const correctedPathToWTwindConfig = pathToTwindConfig.replace(
-//   /^https:\/\/deno\.land/,
-//   "",
-// );
 const config = await import(pathToTwindConfig);
 const twindConfig = config.default;
 

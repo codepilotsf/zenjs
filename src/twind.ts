@@ -1,17 +1,20 @@
 import { getStyleTag, setup, shim, twColors, virtualSheet } from "../deps.ts";
 
-// Todo: wrap in try/catch
-const pathToTwindConfig = "file://" + Deno.cwd() + "/twind.config.ts";
-const config = await import(pathToTwindConfig);
-const twindConfig = config.default;
+let twindConfig;
+
+try {
+  const pathToTwindConfig = "file://" + Deno.cwd() + "/twind.config.ts";
+  const config = await import(pathToTwindConfig);
+  twindConfig = config.default;
+} catch (_) { /* ignore */ }
 
 // Extend the tailwind config with additional taiwind colors.
-if (twindConfig?.theme?.extend?.colors) {
-  twindConfig.theme.extend.colors = {
-    ...twindConfig.theme.extend.colors,
-    ...twColors,
-  };
-}
+twindConfig.theme = twindConfig.theme || {};
+twindConfig.theme.extend = twindConfig.theme.extend || {};
+twindConfig.theme.extend.colors = {
+  ...twindConfig.theme.extend.colors,
+  ...twColors,
+};
 
 const sheet = virtualSheet();
 setup({ ...twindConfig, sheet });

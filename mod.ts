@@ -13,4 +13,4 @@ export { parseTwind } from "./src/twind.ts";
 export { reload, reloadEmitter } from "./src/reload.ts";
 export { session } from "./src/session.ts";
 export { validator } from "./src/validator.ts";
-export { bcrypt, env, ObjectId } from "./deps.ts";
+export { env, ObjectId } from "./deps.ts";

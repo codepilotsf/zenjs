@@ -11,8 +11,8 @@ env.addExtension("markdown", new markdown(env, marked));
 let extendNunjucks;
 try {
   extendNunjucks = (await import(Deno.cwd() + "/nunjucks.ts")).extendNunjucks;
+  extendNunjucks(env);
 } catch (_) { /* ignore */ }
-extendNunjucks(env);
 
 // Export parseLocals to parse the template and return the document.
 export function parseLocals(template, ctx) {

@@ -8,7 +8,6 @@ export { parseHTML } from "https://esm.sh/linkedom@0.14.21";
 export { default as FastestValidator } from "https://esm.sh/fastest-validator@1.16.0";
 export { marked } from "https://deno.land/x/marked/mod.ts";
 export { default as nunjucks } from "https://deno.land/x/nunjucks@3.2.3-2/mod.js";
-export * as bcrypt from "https://deno.land/x/bcrypt@v0.4.1/mod.ts";
 export * as log from "https://deno.land/std@0.178.0/log/mod.ts";
 export * as colors from "https://deno.land/std@0.178.0/fmt/colors.ts";
 export {

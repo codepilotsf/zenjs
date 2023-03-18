@@ -1,10 +1,13 @@
 import { env, MongoStore, Session } from "../deps.ts";
 import { getDb } from "../mod.ts";
 
-const db = await getDb();
-const store = new MongoStore(db, "zenjs_sessions");
+let session;
+if (env.MODE === "dev") {
+  session = Session.initMiddleware();
+} else {
+  const db = await getDb();
+  const store = new MongoStore(db, "zenjs_sessions");
+  session = Session.initMiddleware(store);
+}
 
-// Use in memory session store in dev mode, otherwise use MongoDB.
-export const session = env.MODE === "dev"
-  ? Session.initMiddleware()
-  : Session.initMiddleware(store);
+export { session };

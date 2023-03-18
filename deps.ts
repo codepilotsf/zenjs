@@ -27,4 +27,6 @@ export {
 // Read .env and make available app-wide as `env` object.
 import { config as dotEnv } from "https://deno.land/x/dotenv@v3.2.0/mod.ts";
 dotEnv({ export: true, allowEmptyValues: true });
-export const env = Deno.env.toObject();
+const env = Deno.env.toObject();
+env.MODE = env.MODE || "dev";
+export { env };

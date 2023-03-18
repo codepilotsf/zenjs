@@ -1,15 +1,22 @@
 // deno-lint-ignore-file no-explicit-any
 
-// Note: considered this one too: https://docs.superstructjs.org
+// Using fastest-validator but considered this one too: https://docs.superstructjs.org
 
 import { ObjectId } from "../deps.ts";
 import { getDb, logger, validator } from "../mod.ts";
 
-const db = await getDb();
+let db;
+try {
+  db = await getDb();
+} catch (_) { /* ignore */ }
 
 export function model(options: any) {
   // By default, set $$strict to "remove" to disallow props not in schema.
   if (!options.schema["$$strict"]) options.schema.$$strict = "remove";
+  if (!db) {
+    logger.error("Unable to use model() without database connection");
+    return;
+  }
   const defaultPropsAndMethods = getDefaultPropsAndMethods(options);
   checkForConflicts(options, defaultPropsAndMethods);
   return { ...defaultPropsAndMethods };

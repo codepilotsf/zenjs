@@ -31,6 +31,7 @@ export function getInitCtx(context, page) {
       search: context.request.url.search,
       secure: context.request.secure,
       session: {}, // Readonly session vals gets populated in parseLocals
+      timestamp: Date.now(),
     },
 
     hash: context.request.url.hash,
@@ -48,6 +49,7 @@ export function getInitCtx(context, page) {
     query: query,
     search: context.request.url.search,
     secure: context.request.secure,
+    timestamp: Date.now(),
 
     page,
 

@@ -1,7 +1,7 @@
 import { env as dotenv, marked, nunjucks, parseHTML } from "../deps.ts";
 import { markdown } from "../mod.ts";
 
-const isDev = dotenv.MODE === "dev";
+const isDev = dotenv.MODE !== "live";
 // Configure Nunjucks and get the environment.
 const env = nunjucks.configure("pages", { autoescape: true, noCache: isDev });
 

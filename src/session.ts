@@ -2,7 +2,7 @@ import { env, MongoStore, Session } from "../deps.ts";
 import { getDb } from "../mod.ts";
 
 let session;
-if (env.MODE === "dev") {
+if (env.MODE !== "live") {
   session = Session.initMiddleware();
 } else {
   const db = await getDb();

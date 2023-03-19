@@ -27,7 +27,7 @@ await log.setup({
 // Get logger
 let logger; // TODO: Get default logger.
 
-// if (env.MODE === "dev") {
+// if (env.DEV) {
 logger = log.getLogger("dev");
 logger.request = (message: string) => {
   console.log(colors.gray(message));

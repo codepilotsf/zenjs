@@ -16,9 +16,7 @@ let noCache = 0;
 
 export function getRoutes(Router: any) {
   const router = new Router();
-  return env.MODE !== "live"
-    ? getRoutesFromFiles(router)
-    : getRoutesFromCache(router);
+  return env.DEV ? getRoutesFromFiles(router) : getRoutesFromCache(router);
 }
 
 export async function getErrorTemplate(
@@ -29,7 +27,7 @@ export async function getErrorTemplate(
   urlParts = urlParts || url.split("/").filter((p) => p !== "");
   urlParts.pop();
   const maybeNearestErrorUrl = "/" + [...urlParts, `_${status}`].join("/");
-  if (env.MODE !== "live") {
+  if (env.DEV) {
     // Serve nearest error template from file.
     const maybeNearestErrorAbsPath = path.join(pagesDir, maybeNearestErrorUrl) +
       ".njk";
@@ -383,7 +381,7 @@ async function getInitFunction(templateString: string) {
     : "_";
 
   // If this is dev mode, find init function in actions/ dir.
-  if (env.MODE !== "live") {
+  if (env.DEV) {
     noCache++;
     const actionsModulePath = path.join(
       actionsDir,

@@ -16,6 +16,6 @@ const redis = await connect({
 const store = new RedisStore(redis);
 
 // Use in memory session store in dev mode, otherwise use MongoDB.
-export const session = env.MODE === "dev"
+export const session = env.DEV
   ? Session.initMiddleware()
   : Session.initMiddleware(store);

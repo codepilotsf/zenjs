@@ -58,4 +58,5 @@ function getFileAndLine(stack) {
       return { file: fileName, line: lineNumber };
     }
   }
+  return {};
 }

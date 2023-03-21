@@ -1,6 +1,8 @@
 import { env } from "../deps.ts";
 import { getErrorTemplate, logger, parseTemplate } from "../mod.ts";
 
+const noCache = Date.now();
+
 export function getInitCtx(context, page) {
   // Create plain objects for $meta.query and $meta.headers.
   const query = {};
@@ -13,6 +15,7 @@ export function getInitCtx(context, page) {
 
     // $meta for template parsing but also make most props available directly on ctx.
     $meta: {
+      dev: Boolean(env.DEV),
       error: {},
       flash: getFlashVals(context),
       hash: context.request.url.hash,
@@ -22,7 +25,7 @@ export function getInitCtx(context, page) {
       href: context.request.url.href,
       ip: context.request.ip,
       method: context.request.method,
-      mode: env.MODE,
+      nocache: noCache,
       params: context.params,
       pathname: context.request.url.pathname,
       port: context.request.url.port,
@@ -33,6 +36,7 @@ export function getInitCtx(context, page) {
       session: {}, // Readonly session vals gets populated in parseLocals
     },
 
+    dev: Boolean(env.DEV),
     hash: context.request.url.hash,
     headers: headers,
     host: context.request.url.host,
@@ -40,7 +44,7 @@ export function getInitCtx(context, page) {
     href: context.request.url.href,
     ip: context.request.ip,
     method: context.request.method,
-    mode: env.MODE,
+    nocache: noCache,
     params: context.params,
     pathname: context.request.url.pathname,
     port: context.request.url.port,

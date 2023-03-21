@@ -1,19 +1,19 @@
-import { env as dotenv, marked, nunjucks, parseHTML } from "../deps.ts";
+import { env, marked, nunjucks, parseHTML } from "../deps.ts";
 import { markdown } from "../mod.ts";
 
-const isDev = dotenv.MODE === "dev";
 // Configure Nunjucks and get the environment.
-const env = nunjucks.configure("pages", { autoescape: true, noCache: isDev });
+const noCache = env.DEV ? true : false;
+const nunjucksEnv = nunjucks.configure("pages", { autoescape: true, noCache });
 
 // Add the markdown extension.
-env.addExtension("markdown", new markdown(env, marked));
+nunjucksEnv.addExtension("markdown", new markdown(nunjucksEnv, marked));
 
 // Add custom Nunjucks filters here if there's a top-level file called nunjucks.ts.
 let extendNunjucks;
 try {
   const pathToNunjucks = "file://" + Deno.cwd() + "/nunjucks.ts";
   extendNunjucks = (await import(pathToNunjucks)).extendNunjucks;
-  extendNunjucks(env);
+  extendNunjucks(nunjucksEnv);
 } catch (_) { /* ignore */ }
 
 // Export parseLocals to parse the template and return the document.
@@ -22,7 +22,7 @@ export function parseLocals(template, ctx) {
   // Update $meta.session to latest session values.
   // We do this here in case the user has modified the session values in mount or custom actions.
   $meta.session = getSessionVals(ctx.session);
-  const rendered = env.renderString(template, { ...$, $meta });
+  const rendered = nunjucksEnv.renderString(template, { ...$, $meta });
   const parsedHTML = parseHTML(rendered);
   return parsedHTML["document"];
 }

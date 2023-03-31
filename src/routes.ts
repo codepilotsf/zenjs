@@ -136,19 +136,21 @@ function getRoutesFromFiles(router) {
   // Add a listener for devReload SSE?
   let isFreshServerStart = true;
   router.get("/__reload", (context) => {
-    const target = context.sendEvents();
-    if (isFreshServerStart) {
-      target.dispatchMessage("hardReset");
-      isFreshServerStart = false;
-    }
-    reloadEmitter.removeAllListeners("remergePage");
-    reloadEmitter.removeAllListeners("relinkStaticResources");
-    reloadEmitter.on("remergePage", () => {
-      target.dispatchMessage("remergePage");
-    });
-    reloadEmitter.on("relinkStaticResources", () => {
-      target.dispatchMessage("relinkStaticResources");
-    });
+    try {
+      const target = context.sendEvents();
+      if (isFreshServerStart) {
+        target.dispatchMessage("hardReset");
+        isFreshServerStart = false;
+      }
+      reloadEmitter.removeAllListeners("remergePage");
+      reloadEmitter.removeAllListeners("relinkStaticResources");
+      reloadEmitter.on("remergePage", () => {
+        target.dispatchMessage("remergePage");
+      });
+      reloadEmitter.on("relinkStaticResources", () => {
+        target.dispatchMessage("relinkStaticResources");
+      });
+    } catch (_) { /* ignore */ }
   });
   return router.routes();
 }

@@ -12,8 +12,8 @@ try {
 twindConfig.theme = twindConfig.theme || {};
 twindConfig.theme.extend = twindConfig.theme.extend || {};
 twindConfig.theme.extend.colors = {
-  ...twindConfig.theme.extend.colors,
   ...twColors,
+  ...twindConfig.theme.extend.colors,
 };
 
 const sheet = virtualSheet();

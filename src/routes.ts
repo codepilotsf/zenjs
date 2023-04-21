@@ -93,10 +93,12 @@ function getRoutesFromFiles(router) {
 
   // ## ACTIONS ##
 
-  // Create route for on demands actions.
+  // Create route for on demand actions.
   router.post("/@/(.*)", async (context, next) => {
     noCache++;
-    const relativePath = context.request.url.pathname.slice(3) + ".ts";
+    const relativePath = context.request.url.pathname.slice(3);
+    const jsRelativePath = relativePath + ".js";
+    const tsRelativePath = relativePath + ".ts";
 
     // If any part of path starts with "_", skip it.
     const isHidden = relativePath.split("/").filter((f) =>
@@ -112,17 +114,30 @@ function getRoutesFromFiles(router) {
     const action = { trigger, lastFocused, payload };
     const ctx = getActionCtx(context, action);
 
-    const actionsAbsPath = path.join(actionsDir, relativePath);
-    let actionsModule;
+    const jsActionsAbsPath = path.join(actionsDir, jsRelativePath);
+    let jsActionsModule;
     try {
       const importPathToActionsModule =
-        `file://${actionsAbsPath}?nocache=${noCache}`;
-      actionsModule = await import(importPathToActionsModule);
-    } catch (_) {
-      logger.error("No actions module found at: /" + actionsAbsPath);
+        `file://${jsActionsAbsPath}?nocache=${noCache}`;
+      jsActionsModule = await import(importPathToActionsModule);
+    } catch (_) { /* ignore */ }
+
+    const tsActionsAbsPath = path.join(actionsDir, jsRelativePath);
+    let tsActionsModule;
+    try {
+      const importPathToActionsModule =
+        `file://${tsActionsAbsPath}?nocache=${noCache}`;
+      tsActionsModule = await import(importPathToActionsModule);
+    } catch (_) { /* ignore */ }
+
+    const actionsModule = jsActionsModule || tsActionsModule;
+
+    if (!actionsModule) {
+      logger.error("No actions module found at: /" + jsActionsAbsPath);
       ctx.ignore();
       return;
     }
+
     if (!actionsModule?.default[ctx.actionsMethod]) {
       logger.error(
         `No action "${ctx.actionsMethod}" found in: /${relativePath}`,
@@ -160,7 +175,9 @@ async function getRoutesFromCache(router) {
   // For all other enviroments cache: pagesPaths, errorsPaths, and actionsPaths.
   const pagesAndErrorsPaths = await listPathsInDir(pagesDir, ".njk");
   const { pagesPaths, errorsPaths } = splitPagesAndErrors(pagesAndErrorsPaths);
-  const actionsPaths = await listPathsInDir(actionsDir, ".ts");
+  const jsActionsPaths = await listPathsInDir(actionsDir, ".js");
+  const tsActionsPaths = await listPathsInDir(actionsDir, ".ts");
+  const actionsPaths = [...jsActionsPaths, ...tsActionsPaths];
 
   // For each actionPath, add an entry to actionsCache. (do this before pagePaths so init actions are available)
   for (const actionsPath of actionsPaths) {
@@ -278,7 +295,7 @@ async function getPageFromFiles(pathname) {
   if (page) return [page];
 
   // Else, maybe one or more path segments are params like /books/123.
-  const pagesArray = await glob("pages/**/*.{njk,ts}");
+  const pagesArray = await glob("pages/**/*.{njk,js,ts}");
   const pathSegments = pathname.split("/").filter((p) => p !== "");
   const [paramsAbsPath, params] = findParamsAbsPath(pathSegments, pagesArray);
   page = await getPageObjectFromPagePath(paramsAbsPath);
@@ -366,6 +383,7 @@ async function getInitFunction(templateString: string) {
 
   // If more than one init tag, log error and continue.
   if (initTags?.length > 1) {
+    // TODO: Show only tag names not full object in error.
     logger.error(
       "Using first [z-init] tag and ignoring the rest. Found:",
       initTags,
@@ -385,26 +403,41 @@ async function getInitFunction(templateString: string) {
   // If this is dev mode, find init function in actions/ dir.
   if (env.DEV) {
     noCache++;
-    const actionsModulePath = path.join(
+    const tsActionsModulePath = path.join(
       actionsDir,
       actionsModuleName + `.ts?no-cache=${noCache}`,
     );
-    let actionsModuleObject;
+
+    let tsActionsModuleObject;
     try {
-      actionsModuleObject = await import("file://" + actionsModulePath);
-      actionsModuleObject = actionsModuleObject.default; // actions modules always export default.
-    } catch (error) {
-      // Don't eat this error!
+      tsActionsModuleObject = await import("file://" + tsActionsModulePath);
+      tsActionsModuleObject = tsActionsModuleObject.default; // actions modules always export default.
+    } catch (_) {}
+
+    const jsActionsModulePath = path.join(
+      actionsDir,
+      actionsModuleName + `.js?no-cache=${noCache}`,
+    );
+
+    let jsActionsModuleObject;
+    try {
+      jsActionsModuleObject = await import("file://" + jsActionsModulePath);
+      jsActionsModuleObject = jsActionsModuleObject.default; // actions modules always export default.
+    } catch (_) {}
+
+    // If no actionsModuleObject, log error and return default init function.
+    const actionsModuleObject = tsActionsModuleObject || jsActionsModuleObject;
+    if (!actionsModuleObject) {
       logger.error(
-        `Template contains [z-init="${zInitValue}"] but actions/${actionsModuleName}.ts failed to import\n\n${error.stack}`,
+        `Template contains [z-init="${zInitValue}"] but actions/${actionsModuleName}.js/ts failed to import\n\n${error.stack}`,
       );
+      return defaultInitFunction;
     }
-    if (!actionsModuleObject) return defaultInitFunction;
 
     // If no init function exists in actionsModuleObject, log error and return default init function.
     if (!actionsModuleObject[initMethodName]) {
       logger.error(
-        `Template contains [z-init="${zInitValue}"] but no "${initMethodName}" method is defined in actions/${actionsModuleName}.ts`,
+        `Template contains [z-init="${zInitValue}"] but no "${initMethodName}" method is defined in actions/${actionsModuleName}.js/ts`,
       );
       return defaultInitFunction;
     }
@@ -417,14 +450,14 @@ async function getInitFunction(templateString: string) {
   const cachedInitModule = actionsCache?.get(actionsModuleName);
   if (!cachedInitModule) {
     logger.error(
-      `Template contains [z-init="${zInitValue}"] but no module exists at actions/${actionsModuleName}.ts`,
+      `Template contains [z-init="${zInitValue}"] but no module exists at actions/${actionsModuleName}.js/ts`,
     );
     return defaultInitFunction;
   }
   const cachedInitFunction = cachedInitModule[initMethodName];
   if (!cachedInitFunction) {
     logger.error(
-      `Template contains [z-init="${zInitValue}"] but no "${initMethodName}" method is defined in actions/${actionsModuleName}.ts`,
+      `Template contains [z-init="${zInitValue}"] but no "${initMethodName}" method is defined in actions/${actionsModuleName}.js/ts`,
     );
     return defaultInitFunction;
   }

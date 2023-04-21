@@ -8,10 +8,10 @@ const nunjucksEnv = nunjucks.configure("pages", { autoescape: true, noCache });
 // Add the markdown extension.
 nunjucksEnv.addExtension("markdown", new markdown(nunjucksEnv, marked));
 
-// Add custom Nunjucks filters here if there's a top-level file called nunjucks.ts.
+// Add custom Nunjucks filters here if there's a nunjucks config file.
 let extendNunjucks;
 try {
-  const pathToNunjucks = "file://" + Deno.cwd() + "/nunjucks.ts";
+  const pathToNunjucks = "file://" + Deno.cwd() + "/config/nunjucks.config.js";
   extendNunjucks = (await import(pathToNunjucks)).extendNunjucks;
   extendNunjucks(nunjucksEnv);
 } catch (_) { /* ignore */ }

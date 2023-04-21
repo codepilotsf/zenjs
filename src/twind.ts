@@ -3,7 +3,7 @@ import { getStyleTag, setup, shim, twColors, virtualSheet } from "../deps.ts";
 let twindConfig;
 
 try {
-  const pathToTwindConfig = "file://" + Deno.cwd() + "/twind.config.ts";
+  const pathToTwindConfig = "file://" + Deno.cwd() + "/config/twind.config.js";
   const config = await import(pathToTwindConfig);
   twindConfig = config.default;
 } catch (_) { /* ignore */ }

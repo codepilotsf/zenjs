@@ -4,6 +4,7 @@ export const reloadEmitter = new EventEmitter();
 let timer;
 
 export async function reload() {
+  // Todo: Only watch dirs which exist (i.e. don't watch static if there's no static dir)
   for await (
     const { paths } of Deno.watchFs(["./pages", "./actions", "./static"])
   ) {

@@ -1,5 +1,3 @@
-// deno-lint-ignore-file no-explicit-any
-
 import { env, expandGlob, parseHTML, path } from '../deps.js';
 import { getActionCtx, getInitCtx, logger, reloadEmitter } from '../mod.js';
 
@@ -122,7 +120,7 @@ function getRoutesFromFiles(router) {
       /* ignore */
     }
 
-    const tsActionsAbsPath = path.join(actionsDir, jsRelativePath);
+    const tsActionsAbsPath = path.join(actionsDir, tsRelativePath);
     let tsActionsModule;
     try {
       const importPathToActionsModule = `file://${tsActionsAbsPath}?nocache=${noCache}`;
@@ -414,7 +412,7 @@ async function getInitFunction(templateString) {
     try {
       tsActionsModuleObject = await import('file://' + tsActionsModulePath);
       tsActionsModuleObject = tsActionsModuleObject.default; // actions modules always export default.
-    } catch (_) { }
+    } catch (_) { /* ignore */ }
 
     const jsActionsModulePath = path.join(
       actionsDir,
@@ -425,7 +423,7 @@ async function getInitFunction(templateString) {
     try {
       jsActionsModuleObject = await import('file://' + jsActionsModulePath);
       jsActionsModuleObject = jsActionsModuleObject.default; // actions modules always export default.
-    } catch (_) { }
+    } catch (_) { /* ignore */ }
 
     // If no actionsModuleObject, log error and return default init function.
     const actionsModuleObject = tsActionsModuleObject || jsActionsModuleObject;

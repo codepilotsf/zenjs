@@ -1,20 +1,20 @@
-// deno-lint-ignore-file no-explicit-any
-
 // Using fastest-validator but considered this one too: https://docs.superstructjs.org
 
-import { ObjectId } from "../deps.ts";
-import { getDb, logger, validator } from "../mod.ts";
+import { ObjectId } from '../deps.js';
+import { getDb, logger, validator } from '../mod.js';
 
 let db;
 try {
   db = await getDb();
-} catch (_) { /* ignore */ }
+} catch (_) {
+  /* ignore */
+}
 
-export function model(options: any) {
+export function model(options) {
   // By default, set $$strict to "remove" to disallow props not in schema.
-  if (!options.schema["$$strict"]) options.schema.$$strict = "remove";
+  if (!options.schema['$$strict']) options.schema.$$strict = 'remove';
   if (!db) {
-    logger.error("Unable to use model() without database connection");
+    logger.error('Unable to use model() without database connection');
     return;
   }
   const defaultPropsAndMethods = getDefaultPropsAndMethods(options);
@@ -32,7 +32,7 @@ function getDefaultPropsAndMethods(options) {
     schema: options.schema,
 
     // create(): Insert a single document into the collection.
-    async create(doc: any) {
+    async create(doc) {
       try {
         const invalid = await this.validateAll(doc);
         if (invalid) {
@@ -60,7 +60,7 @@ function getDefaultPropsAndMethods(options) {
     // },
 
     // read(): Get a single document in the collection matching _id string or query.
-    async read(query: any) {
+    async read(query) {
       query = convertIdToObjectId(query);
       try {
         return await collection.findOne(query);
@@ -70,9 +70,9 @@ function getDefaultPropsAndMethods(options) {
     },
 
     // readAll(): List all documents in the collection matching the optional query.
-    async readAll(query?: any) {
+    async readAll(query) {
       try {
-        return await collection.find(query || {}).toArray() || [];
+        return (await collection.find(query || {}).toArray()) || [];
       } catch (error) {
         logger.error(error);
         return [];
@@ -85,14 +85,15 @@ function getDefaultPropsAndMethods(options) {
       if (!query) return null;
 
       // The update object must not contain the immutable _id field.
-      if (Object.keys(update).includes("_id")) delete update._id;
+      if (Object.keys(update).includes('_id')) delete update._id;
       try {
         const invalid = await this.validatePartial(update);
         if (invalid) return invalid;
-        const res = await collection.findAndModify(
-          query,
-          { update: { $set: update }, new: true },
-        );
+        const res = await collection.findAndModify(query, {
+          update: { $set: update },
+          new: true,
+        });
+
         return res || null;
       } catch (error) {
         logger.error(error);
@@ -107,13 +108,11 @@ function getDefaultPropsAndMethods(options) {
     // },
 
     // delete(): Delete a single document in the collection matching _id string or query.
-    async delete(query: any) {
+    async delete(query) {
       query = convertIdToObjectId(query);
       try {
-        const res = await collection.findAndModify(
-          query,
-          { remove: true },
-        );
+        const res = await collection.findAndModify(query, { remove: true });
+
         return res || null;
       } catch (error) {
         logger.error(error);
@@ -137,10 +136,10 @@ function getDefaultPropsAndMethods(options) {
     // },
 
     // count(): Count the number of documents in the collection matching the query.
-    async count(query: any) {
+    async count(query) {
       query = convertIdToObjectId(query);
       try {
-        return await collection.count(query) || 0;
+        return (await collection.count(query)) || 0;
       } catch (error) {
         logger.error(error);
         return 0;
@@ -148,10 +147,10 @@ function getDefaultPropsAndMethods(options) {
     },
 
     // exists(): Check if a document exists in the collection matching the query.
-    async exists(query: any) {
+    async exists(query) {
       query = convertIdToObjectId(query);
       try {
-        return await collection.count(query) > 0;
+        return (await collection.count(query)) > 0;
       } catch (error) {
         logger.error(error);
         return false;
@@ -181,7 +180,7 @@ function getDefaultPropsAndMethods(options) {
     },
 
     // validateAll(): Validate a document against the schema.
-    async validateAll(doc: any) {
+    async validateAll(doc) {
       const invalid = {};
       const validationRes = await checkValidation(doc);
       if (validationRes === true) return null;
@@ -192,7 +191,7 @@ function getDefaultPropsAndMethods(options) {
     },
 
     // validatePartial(): Validate a partial document against the schema (ignore missing keys).
-    async validatePartial(doc: any) {
+    async validatePartial(doc) {
       const copy = { ...doc }; // don't mutate the original document!
       const invalid = {};
       const fullInvalid = await this.validateAll(copy);
@@ -211,23 +210,23 @@ function checkForConflicts(options, defaultPropsAndMethods) {
   for (const key in defaultPropsAndMethods) {
     if (options?.methods && options.methods[key]) {
       logger.error(
-        `Model ${options.collection} cannot have a property or method named ${key}`,
+        `Model ${options.collection} cannot have a property or method named ${key}`
       );
     }
   }
 }
 
 // =========================================
-function convertIdToObjectId(query: any) {
+function convertIdToObjectId(query) {
   // Convert _id string to { _id: <objectid> }
-  if (typeof query === "string") {
+  if (typeof query === 'string') {
     return { _id: new ObjectId(query) };
   } // Or is this an actual ObjectId?
   else if (query instanceof ObjectId) {
     return { _id: query };
   } // Convert object with { _id: string } to { _id: <objectid> }
-  else if (typeof query === "object") {
-    if (query._id && typeof query._id === "string") {
+  else if (typeof query === 'object') {
+    if (query._id && typeof query._id === 'string') {
       query._id = new ObjectId(query._id);
     }
   }

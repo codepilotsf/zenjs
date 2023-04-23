@@ -1,5 +1,5 @@
-import { env } from "../deps.ts";
-import { getErrorTemplate, logger, parseTemplate } from "../mod.ts";
+import { env } from '../deps.js';
+import { getErrorTemplate, logger, parseTemplate } from '../mod.js';
 
 const noCache = Date.now();
 
@@ -7,8 +7,8 @@ export function getInitCtx(context, page) {
   // Create plain objects for $meta.query and $meta.headers.
   const query = {};
   const headers = {};
-  context.request.url.searchParams.forEach((v, k) => query[k] = v);
-  context.request.headers.forEach((v, k) => headers[k] = v);
+  context.request.url.searchParams.forEach((v, k) => (query[k] = v));
+  context.request.headers.forEach((v, k) => (headers[k] = v));
 
   const ctx = {
     $: {},
@@ -71,9 +71,9 @@ export function getInitCtx(context, page) {
     redirect(url) {
       logger.request(`${reqType(ctx)} ${ctx.$meta.pathname} ▷ REDIRECT ${url}`);
       context.response.status = 204;
-      if (context.request.headers.get("z-merge")) {
-        context.response.headers.set("z-redirect", url);
-        context.response.headers.set("z-replace-state", url);
+      if (context.request.headers.get('z-merge')) {
+        context.response.headers.set('z-redirect', url);
+        context.response.headers.set('z-replace-state', url);
       } else {
         context.response.redirect(url);
       }
@@ -81,14 +81,14 @@ export function getInitCtx(context, page) {
 
     render() {
       // Log except for dev reload.
-      if (!context.request.headers.get("z-reload")) {
+      if (!context.request.headers.get('z-reload')) {
         logger
           ? logger.request(`${reqType(ctx)} ${ctx.$meta.pathname} ▷ RENDER`)
           : null;
       }
       const body = parseTemplate(ctx.page.templateString, ctx)?.toString();
       context.response.status = 200;
-      context.response.headers.set("Content-Type", "text/html");
+      context.response.headers.set('Content-Type', 'text/html');
       context.response.body = body;
     },
 
@@ -99,7 +99,7 @@ export function getInitCtx(context, page) {
 
     json(data) {
       logger.request(`DIRECT ${ctx.$meta.pathname} ▷ JSON`);
-      ctx.setHeader("Content-Type", "application/json");
+      ctx.setHeader('Content-Type', 'application/json');
       context.response.body = data;
     },
 
@@ -107,17 +107,17 @@ export function getInitCtx(context, page) {
       logger.request(`${reqType(ctx)} ${ctx.$meta.pathname} ▷ 404`);
       logger.error(`404 NOT FOUND: ${ctx.$meta.pathname}`);
       const template = getErrorTemplate(404, ctx.$meta.pathname);
-      ctx.$["title"] = "Not Found";
+      ctx.$['title'] = 'Not Found';
       context.response.status = 404;
       context.response.body = parseTemplate(template, ctx).toString();
     },
 
-    _500(name = "", message = "") {
-      name = name ? `Error: ${name}` : "Internal Server Error";
+    _500(name = '', message = '') {
+      name = name ? `Error: ${name}` : 'Internal Server Error';
       logger.request(`${reqType(ctx)} ${ctx.$meta.pathname} ▷ 500`);
       logger.error(`${name} ${message}`);
       const template = getErrorTemplate(500, ctx.$meta.pathname);
-      ctx.$["title"] = "Internal Server Error";
+      ctx.$['title'] = 'Internal Server Error';
       ctx.$meta.error = { name, message };
       context.response.status = 500;
       context.response.body = parseTemplate(template, ctx).toString();
@@ -130,11 +130,11 @@ export function getInitCtx(context, page) {
 export function getActionCtx(context, action) {
   // Get the action name from query string.
   const searchParams = {};
-  context.request.url.searchParams.forEach((v, k) => searchParams[k] = v);
+  context.request.url.searchParams.forEach((v, k) => (searchParams[k] = v));
   const actionsMethod = Object.keys(searchParams)[0];
   const actionsModule = context.request.url.pathname.slice(3);
 
-  const { $, page, $meta } = context.state.session.get("_state_");
+  const { $, page, $meta } = context.state.session.get('_state_');
 
   const { trigger, lastFocused, payload } = action;
 
@@ -174,15 +174,16 @@ export function getActionCtx(context, action) {
     render(elements) {
       if (!elements) {
         logger.error(
-          `Missing required elements arg to render() in ${actionsModule}.${actionsMethod}`,
+          `Missing required elements arg to render() in ${actionsModule}.${actionsMethod}`
         );
+
         return;
       }
       // If elements is a single string, convert to array.
       elements = Array.isArray(elements) ? elements : [elements];
 
       // Render specified elements with Nunjucks.
-      const elementsToRender: string[] = [];
+      const elementsToRender = [];
 
       const dom = parseTemplate(ctx.page.templateString, ctx);
 
@@ -192,8 +193,9 @@ export function getActionCtx(context, action) {
         const elementTemplate = dom.querySelector(elementId)?.outerHTML;
         if (!elementTemplate) {
           logger.error(
-            `Unable to render element ${elementId} because it does not exist in template`,
+            `Unable to render element ${elementId} because it does not exist in template`
           );
+
           return;
         }
         elementsToRender.push(elementTemplate);
@@ -201,26 +203,28 @@ export function getActionCtx(context, action) {
 
       // If there were any modifiers, we also need to send new twind styles.
       if (ctx.elementsToModify) {
-        const twindStyles = dom.getElementById("__twind")?.outerHTML;
+        const twindStyles = dom.getElementById('__twind')?.outerHTML;
         elementsToRender.push(twindStyles);
         ctx.elementsToModify = {};
       }
 
       logger.request(
-        ` ▷ ACTION ${actionsModule}.${actionsMethod} ▷ RENDER ${
-          elements.join(", ")
-        }`,
+        ` ▷ ACTION ${actionsModule}.${actionsMethod} ▷ RENDER ${elements.join(
+          ', '
+        )}`
       );
+
       context.response.status = 200;
-      context.response.headers.set("Content-Type", "text/html");
-      context.response.body = elementsToRender.join("\n\n");
+      context.response.headers.set('Content-Type', 'text/html');
+      context.response.body = elementsToRender.join('\n\n');
     },
 
     redirect(url) {
       logger.request(
-        ` ▷ ACTION ${actionsModule}.${actionsMethod} ▷ REDIRECT ▷ ${url} `,
+        ` ▷ ACTION ${actionsModule}.${actionsMethod} ▷ REDIRECT ▷ ${url} `
       );
-      context.response.headers.set("z-redirect", url);
+
+      context.response.headers.set('z-redirect', url);
       context.response.status = 204;
     },
 
@@ -228,20 +232,20 @@ export function getActionCtx(context, action) {
       logger.request(` ▷ ACTION ${actionsModule}.${actionsMethod} ▷ 404`);
       logger.error(`404 NOT FOUND: ${ctx.$meta.pathname}`);
       const template = getErrorTemplate(404, ctx.$meta.pathname);
-      ctx.$["title"] = "Not Found";
-      context.response.headers.set("z-error", true);
+      ctx.$['title'] = 'Not Found';
+      context.response.headers.set('z-error', true);
       context.response.status = 404;
       context.response.body = parseTemplate(template, ctx);
     },
 
-    _500(name = "", message = "") {
-      name = name ? `${name}` : "Internal Server Error";
+    _500(name = '', message = '') {
+      name = name ? `${name}` : 'Internal Server Error';
       logger.request(` ▷ ACTION ${actionsModule}.${actionsMethod} ▷ 500`);
       logger.error(`${name} ${message}`);
       const template = getErrorTemplate(500, ctx.$meta.pathname);
-      ctx.$["title"] = "Internal Server Error";
+      ctx.$['title'] = 'Internal Server Error';
       ctx.$meta.error = { name, message };
-      context.response.headers.set("z-error", true);
+      context.response.headers.set('z-error', true);
       context.response.status = 500;
       context.response.body = parseTemplate(template, ctx);
     },
@@ -252,13 +256,13 @@ export function getActionCtx(context, action) {
     },
 
     withElement(elementId) {
-      elementId = elementId.replace(/^#/, "");
+      elementId = elementId.replace(/^#/, '');
       ctx.elementsToModify[elementId] = ctx.elementsToModify[elementId] || [];
       return {
         addClass(classes) {
           classes = Array.isArray(classes) ? classes : [classes];
           ctx.elementsToModify[elementId].push({
-            type: "addClass",
+            type: 'addClass',
             data: classes,
           });
           return this;
@@ -266,21 +270,21 @@ export function getActionCtx(context, action) {
         removeClass(classes) {
           classes = Array.isArray(classes) ? classes : [classes];
           ctx.elementsToModify[elementId].push({
-            type: "removeClass",
+            type: 'removeClass',
             data: classes,
           });
           return this;
         },
         setAttr(attr, value) {
           ctx.elementsToModify[elementId].push({
-            type: "setAttr",
+            type: 'setAttr',
             data: [attr, value],
           });
           return this;
         },
         removeAttr(attr) {
           ctx.elementsToModify[elementId].push({
-            type: "removeAttr",
+            type: 'removeAttr',
             data: [attr],
           });
           return this;
@@ -295,15 +299,13 @@ export function getActionCtx(context, action) {
 function isValidId(id) {
   const isValid = /^#[A-Za-z]+[\w\-\:\.]*$/.test(id);
   if (!isValid) {
-    logger.error(
-      `Invalid id reference \`${id}\` used in action handler`,
-    );
+    logger.error(`Invalid id reference \`${id}\` used in action handler`);
   }
   return isValid;
 }
 
-function reqType(ctx): string {
-  return ctx.$meta.headers["z-merge"] ? "MERGE" : "DIRECT";
+function reqType(ctx) {
+  return ctx.$meta.headers['z-merge'] ? 'MERGE' : 'DIRECT';
 }
 
 function getFlashVals(context) {

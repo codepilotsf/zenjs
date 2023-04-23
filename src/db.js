@@ -1,5 +1,5 @@
-import { env, MongoClient } from "../deps.ts";
-import { logger } from "../mod.ts";
+import { env, MongoClient } from '../deps.js';
+import { logger } from '../mod.js';
 
 let db;
 
@@ -15,7 +15,7 @@ export async function getDb() {
     await client.connect(env.MONGO_URI);
     return client.database();
   } catch (error) {
-    logger.error("Connection to MongoDB failed");
+    logger.error('Connection to MongoDB failed');
     throw error;
   }
 }

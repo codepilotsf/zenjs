@@ -1,9 +1,9 @@
-import { colors, log } from "../deps.ts";
+import { colors, log } from '../deps.js';
 
 // custom configuration with 2 loggers (the default and `tasks` loggers)
 await log.setup({
   handlers: {
-    console: new log.handlers.ConsoleHandler("DEBUG"),
+    console: new log.handlers.ConsoleHandler('DEBUG'),
     // file: new log.handlers.FileHandler("WARNING", {
     //   filename: "./log.txt",
     //   // you can change format of output message using any keys in `LogRecord`
@@ -18,8 +18,8 @@ await log.setup({
     // },
 
     dev: {
-      level: "DEBUG",
-      handlers: ["console", "file"],
+      level: 'DEBUG',
+      handlers: ['console', 'file'],
     },
   },
 });
@@ -28,8 +28,8 @@ await log.setup({
 let logger; // TODO: Get default logger.
 
 // if (env.DEV) {
-logger = log.getLogger("dev");
-logger.request = (message: string) => {
+logger = log.getLogger('dev');
+logger.request = (message) => {
   console.log(colors.gray(message));
   // };
 };

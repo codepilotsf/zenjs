@@ -1,32 +1,43 @@
-import { env, marked, nunjucks, parseHTML } from '../deps.js';
-import { markdown } from '../mod.js';
+import { env, marked, nunjucks, parseHTML } from "../deps.js";
+import { markdown } from "../mod.js";
 
 // Configure Nunjucks and get the environment.
 const noCache = env.DEV ? true : false;
-const nunjucksEnv = nunjucks.configure('pages', { autoescape: true, noCache });
+const nunjucksEnv = nunjucks.configure("pages", { autoescape: true, noCache });
 
 // Add the markdown extension.
-nunjucksEnv.addExtension('markdown', new markdown(nunjucksEnv, marked));
+nunjucksEnv.addExtension("markdown", new markdown(nunjucksEnv, marked));
 
 // Add custom Nunjucks filters here if there's a nunjucks config file.
 let extendNunjucks;
 try {
-  const pathToNunjucks = 'file://' + Deno.cwd() + '/config/nunjucks.config.js';
+  const pathToNunjucks = "file://" + Deno.cwd() + "/config/nunjucks.config.js";
   extendNunjucks = (await import(pathToNunjucks)).extendNunjucks;
   extendNunjucks(nunjucksEnv);
 } catch (_) {
   /* ignore */
 }
 
+// Export parseInits to parse the template and return the z-init tags.
+export function parseInits(template) {
+  const rendered = nunjucksEnv.renderString(template);
+  const dom = parseHTML(rendered);
+  const initTags = dom["document"]?.querySelectorAll("[z-init]");
+  return initTags;
+}
+
 // Export parseLocals to parse the template and return the document.
-export function parseLocals(template, ctx) {
+export async function parseLocals(template, ctx) {
+  if (template instanceof Promise) {
+    template = await template;
+  }
   const { $, $meta } = ctx;
   // Update $meta.session to latest session values.
   // We do this here in case the user has modified the session values in mount or custom actions.
   $meta.session = getSessionVals(ctx.session);
   const rendered = nunjucksEnv.renderString(template, { ...$, $meta });
   const parsedHTML = parseHTML(rendered);
-  return parsedHTML['document'];
+  return parsedHTML["document"];
 }
 
 function getSessionVals(session) {
@@ -34,7 +45,7 @@ function getSessionVals(session) {
   // values that the user has set so we skip keys that start with an underscore.
   const sessionVals = {};
   Object.keys(session.data)
-    .filter((key) => !key.startsWith('_'))
+    .filter((key) => !key.startsWith("_"))
     .forEach((key) => {
       sessionVals[key] = session.get(key);
     });

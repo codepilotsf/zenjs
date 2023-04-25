@@ -86,7 +86,7 @@ function getRoutesFromFiles(router) {
 
     // Page was found. Render it.
     const ctx = getInitCtx(context, page);
-    await ctx.page.initFunctionStack[0](ctx, ctx.$);
+    await ctx.next(ctx);
     context.state.session.set("_state_", {
       $: ctx.$,
       $meta: ctx.$meta,
@@ -373,8 +373,16 @@ async function getPageObjectFromPagePath(pagePath) {
   try {
     const templatePath = pagePath;
     const templateString = Deno.readTextFileSync(pagePath);
+    const _404String = await getErrorTemplate(404, pagePath);
+    const _500String = await getErrorTemplate(500, pagePath);
     const initFunctionStack = await getInitFunctionStack(templateString);
-    return { templatePath, templateString, initFunctionStack };
+    return {
+      templatePath,
+      templateString,
+      _404String,
+      _500String,
+      initFunctionStack,
+    };
   } catch (_) {
     return null;
   }

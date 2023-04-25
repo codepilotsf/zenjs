@@ -104,9 +104,10 @@ export function getInitCtx(context, page) {
     },
 
     _404() {
+      // console.log("got to 404", ctx.page._404String);
       logger.request(`${reqType(ctx)} ${ctx.$meta.pathname} ▷ 404`);
       logger.error(`404 NOT FOUND: ${ctx.$meta.pathname}`);
-      const template = getErrorTemplate(404, ctx.$meta.pathname);
+      const template = ctx.page._404String;
       ctx.$["title"] = "Not Found";
       context.response.status = 404;
       context.response.body = parseTemplate(template, ctx).toString();
@@ -116,20 +117,20 @@ export function getInitCtx(context, page) {
       name = name ? `Error: ${name}` : "Internal Server Error";
       logger.request(`${reqType(ctx)} ${ctx.$meta.pathname} ▷ 500`);
       logger.error(`${name} ${message}`);
-      const template = getErrorTemplate(500, ctx.$meta.pathname);
+      const template = ctx.page._500String;
       ctx.$["title"] = "Internal Server Error";
       ctx.$meta.error = { name, message };
       context.response.status = 500;
       context.response.body = parseTemplate(template, ctx).toString();
     },
 
-    next() {
+    async next() {
       const nextInitFunction = page.initFunctionStack.shift();
       if (!nextInitFunction) {
         ctx._500("ctx.next() failed", "No next init function in stack.");
         return;
       }
-      nextInitFunction(ctx);
+      await nextInitFunction(ctx, ctx.$);
     },
   };
 

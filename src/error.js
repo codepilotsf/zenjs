@@ -23,8 +23,6 @@ export async function error404(context) {
 }
 
 export async function catch500(context, next) {
-  console.log("got to catch500");
-
   try {
     await next();
   } catch (error) {

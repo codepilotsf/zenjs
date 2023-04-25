@@ -27,10 +27,7 @@ export function parseInits(template) {
 }
 
 // Export parseLocals to parse the template and return the document.
-export async function parseLocals(template, ctx) {
-  if (template instanceof Promise) {
-    template = await template;
-  }
+export function parseLocals(template, ctx) {
   const { $, $meta } = ctx;
   // Update $meta.session to latest session values.
   // We do this here in case the user has modified the session values in mount or custom actions.

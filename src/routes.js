@@ -1,4 +1,4 @@
-import { env, expandGlob, parseHTML, path } from "../deps.js";
+import { env, expandGlob, path } from "../deps.js";
 import {
   getActionCtx,
   getInitCtx,

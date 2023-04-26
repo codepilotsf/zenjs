@@ -140,14 +140,16 @@ function getRoutesFromFiles(router) {
     const actionsModule = jsActionsModule || tsActionsModule;
 
     if (!actionsModule) {
-      logger.error("No actions module found at: /" + jsActionsAbsPath);
+      logger.error(
+        `No actions module found at /actions/${relativePath}.js/.ts`,
+      );
       ctx.ignore();
       return;
     }
 
     if (!actionsModule?.default[ctx.actionsMethod]) {
       logger.error(
-        `No action "${ctx.actionsMethod}" found in: /${relativePath}`,
+        `No action "${ctx.actionsMethod}" found in: /actions/${relativePath}.js/.ts`,
       );
 
       ctx.ignore();

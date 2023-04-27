@@ -1,9 +1,9 @@
-import { getStyleTag, setup, shim, twColors, virtualSheet } from '../deps.js';
+import { getStyleTag, setup, shim, twColors, virtualSheet } from "../deps.js";
 
 let twindConfig;
 
 try {
-  const pathToTwindConfig = 'file://' + Deno.cwd() + '/config/twind.config.js';
+  const pathToTwindConfig = "file://" + Deno.cwd() + "/config/twind.config.js";
   const config = await import(pathToTwindConfig);
   twindConfig = config.default;
 } catch (_) {
@@ -27,7 +27,7 @@ export function parseTwind(dom) {
   let template = dom.toString();
   template = shim(template);
   const styleTag = getStyleTag(sheet);
-  const twindTag = dom.getElementById('__twind');
-  if (twindTag) twindTag.innerHTML = styleTag;
+  const twindTag = dom.getElementById("__twind");
+  if (twindTag) twindTag.outerHTML = styleTag;
   return dom;
 }

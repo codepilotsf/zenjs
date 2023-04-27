@@ -19,8 +19,8 @@ try {
 }
 
 // Export parseInits to parse the template and return the z-init tags.
-export function parseInits(template) {
-  const rendered = nunjucksEnv.renderString(template);
+export function parseInits(templateString) {
+  const rendered = nunjucksEnv.renderString(templateString);
   const dom = parseHTML(rendered);
   const initTags = dom["document"]?.querySelectorAll("[z-init]");
   return initTags;

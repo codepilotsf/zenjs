@@ -127,7 +127,8 @@ export function getInitCtx(context, page) {
     async next() {
       const nextInitFunction = page.initFunctionStack.shift();
       if (!nextInitFunction) {
-        ctx._500("ctx.next() failed", "No next init function in stack.");
+        // ctx._500("ctx.next() failed", "No next init function in stack.");
+        ctx.render();
         return;
       }
       await nextInitFunction(ctx, ctx.$);

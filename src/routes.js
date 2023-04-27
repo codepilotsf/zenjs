@@ -427,7 +427,7 @@ async function getInitFunctionStack(templateString) {
     // If no actions module is found, add the default init function.
     if (!actionsModule) {
       logger.error(
-        `Template contains [z-init="${zInitValue}"] but no module exists at actions/${actionsModuleName}.js/ts`,
+        `Template contains [z-init="${zInitValue}"] but no module exists at actions/${actionsModuleName}.js|ts`,
       );
       initFunctionStack.push(defaultInitFunction);
       break;
@@ -437,7 +437,7 @@ async function getInitFunctionStack(templateString) {
     const initFunction = actionsModule[initFunctionName];
     if (!initFunction) {
       logger.error(
-        `Template contains [z-init="${zInitValue}"] but no "${initFunctionName}" method is defined in actions/${actionsModuleName}.js/ts`,
+        `Template contains [z-init="${zInitValue}"] but no "${initFunctionName}" method is defined in actions/${actionsModuleName}.js|ts`,
       );
       initFunctionStack.push(defaultInitFunction);
       break;

@@ -1,5 +1,5 @@
 import { env, marked, nunjucks, parseHTML } from "../deps.js";
-import { markdown } from "../mod.js";
+import { logger, markdown } from "../mod.js";
 
 // Configure Nunjucks and get the environment.
 const noCache = env.DEV ? true : false;

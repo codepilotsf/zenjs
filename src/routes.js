@@ -372,22 +372,22 @@ function findParamsAbsPath(
 }
 
 async function getPageObjectFromPagePath(pagePath) {
+  let templateString, _404String, _500String;
   try {
-    const templatePath = pagePath;
-    const templateString = Deno.readTextFileSync(pagePath);
-    const _404String = await getErrorTemplate(404, pagePath);
-    const _500String = await getErrorTemplate(500, pagePath);
-    const initFunctionStack = await getInitFunctionStack(templateString);
-    return {
-      templatePath,
-      templateString,
-      _404String,
-      _500String,
-      initFunctionStack,
-    };
+    templateString = Deno.readTextFileSync(pagePath);
+    _404String = await getErrorTemplate(404, pagePath);
+    _500String = await getErrorTemplate(500, pagePath);
   } catch (_) {
     return null;
   }
+  const initFunctionStack = await getInitFunctionStack(templateString);
+  return {
+    templatePath: pagePath,
+    templateString,
+    _404String,
+    _500String,
+    initFunctionStack,
+  };
 }
 
 async function getInitFunctionStack(templateString) {

@@ -84,14 +84,14 @@ function getRoutesFromFiles(router) {
       return;
     }
 
-    // Page was found. Render it.
+    // Page was found. Get ctx, save the _state_ to session, and render with next init function in stack.
     const ctx = getInitCtx(context, page);
-    await ctx.next(ctx);
     context.state.session.set("_state_", {
       $: ctx.$,
       $meta: ctx.$meta,
       page: ctx.page,
     });
+    await ctx.next(ctx);
   });
 
   // ## ACTIONS ##

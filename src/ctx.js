@@ -86,10 +86,28 @@ export function getInitCtx(context, page) {
           ? logger.request(`${reqType(ctx)} ${ctx.$meta.pathname} ▷ RENDER`)
           : null;
       }
-      const body = parseTemplate(ctx.page.templateString, ctx)?.toString();
+      const dom = parseTemplate(ctx.page.templateString, ctx);
+      let responseBody = "";
+
+      // For z-target request send only the target elements otherwise send the whole page.
+      const target = context.request.headers.get("z-target");
+      if (target) {
+        context.response.headers.set("z-target", target);
+        responseBody = dom.querySelector("head").toString();
+        target.split(" ").forEach((id) => {
+          try {
+            const el = dom.querySelector(id);
+            responseBody += "\n" + el.toString();
+          } catch (_) {
+            logger.error(`Target element not found: ${id}`);
+          }
+        });
+      } else {
+        responseBody = dom.toString();
+      }
       context.response.status = 200;
       context.response.headers.set("Content-Type", "text/html");
-      context.response.body = body;
+      context.response.body = responseBody;
     },
 
     send(text) {

@@ -69,7 +69,7 @@ export function getInitCtx(context, page) {
     },
 
     redirect(url) {
-      logger.request(`${reqType(ctx)} ${ctx.$meta.pathname} ▷ REDIRECT ${url}`);
+      logger.request(`${reqType(ctx)} ${ctx.pathname} ▷ REDIRECT ${url}`);
       context.response.status = 204;
       if (context.request.headers.get("z-merge")) {
         context.response.headers.set("z-redirect", url);
@@ -81,50 +81,57 @@ export function getInitCtx(context, page) {
 
     render() {
       // Log except for dev reload.
-      if (!context.request.headers.get("z-reload")) {
-        logger
-          ? logger.request(`${reqType(ctx)} ${ctx.$meta.pathname} ▷ RENDER`)
-          : null;
+      const isReload = context.request.headers.get("z-reload");
+      const reqTypeName = isReload ? "RELOAD" : reqType(ctx);
+      const zTargetEls = context.request.headers.get("z-target");
+      let logMessage = `${reqTypeName} ${ctx.pathname} ▷ RENDER`;
+      if (zTargetEls) {
+        const prettyZTargetEls = zTargetEls.split(" ").join(", ");
+        logMessage += ` ${prettyZTargetEls}`;
       }
+      logger.request(logMessage);
       const dom = parseTemplate(ctx.page.templateString, ctx);
-      let responseBody = "";
+      let responseString = "";
 
       // For z-target request send only the target elements otherwise send the whole page.
       const target = context.request.headers.get("z-target");
       if (target) {
         context.response.headers.set("z-target", target);
-        responseBody = dom.querySelector("head").toString();
+        let bodyString = "<body>\n";
         target.split(" ").forEach((id) => {
           try {
             const el = dom.querySelector(id);
-            responseBody += "\n" + el.toString();
+            bodyString += "\n" + el.toString();
           } catch (_) {
             logger.error(`Target element not found: ${id}`);
           }
         });
+        bodyString += "</body>\n";
+        const headString = dom.querySelector("head").toString();
+        responseString = `<html>\n${headString}\n${bodyString}</html>`;
       } else {
-        responseBody = dom.toString();
+        responseString = dom.toString();
       }
       context.response.status = 200;
       context.response.headers.set("Content-Type", "text/html");
-      context.response.body = responseBody;
+      context.response.body = responseString;
     },
 
     send(text) {
-      logger.request(`DIRECT ${ctx.$meta.pathname} ▷ SEND`);
+      logger.request(`DIRECT ${ctx.pathname} ▷ SEND`);
       context.response.body = text;
     },
 
     json(data) {
-      logger.request(`DIRECT ${ctx.$meta.pathname} ▷ JSON`);
+      logger.request(`DIRECT ${ctx.pathname} ▷ JSON`);
       ctx.setHeader("Content-Type", "application/json");
       context.response.body = data;
     },
 
     _404() {
       // console.log("got to 404", ctx.page._404String);
-      logger.request(`${reqType(ctx)} ${ctx.$meta.pathname} ▷ 404`);
-      logger.error(`404 NOT FOUND: ${ctx.$meta.pathname}`);
+      logger.request(`${reqType(ctx)} ${ctx.pathname} ▷ 404`);
+      logger.error(`404 NOT FOUND: ${ctx.pathname}`);
       const template = ctx.page._404String;
       ctx.$["title"] = "Not Found";
       context.response.status = 404;
@@ -133,7 +140,7 @@ export function getInitCtx(context, page) {
 
     _500(name = "", message = "") {
       name = name ? `Error: ${name}` : "Internal Server Error";
-      logger.request(`${reqType(ctx)} ${ctx.$meta.pathname} ▷ 500`);
+      logger.request(`${reqType(ctx)} ${ctx.pathname} ▷ 500`);
       logger.error(`${name} ${message}`);
       const template = ctx.page._500String;
       ctx.$["title"] = "Internal Server Error";
@@ -261,8 +268,8 @@ export function getActionCtx(context, action) {
 
     _404() {
       logger.request(` ▷ ACTION ${actionsModule}.${actionsMethod} ▷ 404`);
-      logger.error(`404 NOT FOUND: ${ctx.$meta.pathname}`);
-      const template = getErrorTemplate(404, ctx.$meta.pathname);
+      logger.error(`404 NOT FOUND: ${ctx.pathname}`);
+      const template = getErrorTemplate(404, ctx.pathname);
       ctx.$["title"] = "Not Found";
       context.response.headers.set("z-error", true);
       context.response.status = 404;
@@ -273,7 +280,7 @@ export function getActionCtx(context, action) {
       name = name ? `${name}` : "Internal Server Error";
       logger.request(` ▷ ACTION ${actionsModule}.${actionsMethod} ▷ 500`);
       logger.error(`${name} ${message}`);
-      const template = getErrorTemplate(500, ctx.$meta.pathname);
+      const template = getErrorTemplate(500, ctx.pathname);
       ctx.$["title"] = "Internal Server Error";
       ctx.$meta.error = { name, message };
       context.response.headers.set("z-error", true);

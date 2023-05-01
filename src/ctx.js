@@ -80,7 +80,7 @@ export function getInitCtx(context, page) {
     },
 
     render() {
-      // Log except for dev reload.
+      // Log the request to standard out.
       const isReload = context.request.headers.get("z-reload");
       const reqTypeName = isReload ? "RELOAD" : reqType(ctx);
       const zTargetEls = context.request.headers.get("z-target");

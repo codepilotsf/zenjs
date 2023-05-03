@@ -1,6 +1,6 @@
 export { expandGlob } from "https://deno.land/std@0.178.0/fs/mod.ts";
 export {
-  MongoStore,
+  MemoryStore,
   RedisStore,
   Session,
 } from "https://deno.land/x/oak_sessions@v4.1.0/mod.ts";

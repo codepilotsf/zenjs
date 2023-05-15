@@ -179,7 +179,7 @@ function getRoutesFromFiles(router) {
       /* ignore */
     }
   });
-  return router.routes();
+  return router;
 }
 
 // Return routes for pages and actions cached at server start time (for non-dev mode).

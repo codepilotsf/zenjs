@@ -1,4 +1,6 @@
 import { env } from "../deps.js";
+import { getPocketbase } from "./pocketbase.js";
+
 import { getErrorTemplate, logger, parseTemplate } from "../mod.js";
 
 const noCache = Date.now();
@@ -58,6 +60,8 @@ export function getInitCtx(context, page) {
     session: context.state.session,
 
     elementsToModify: {},
+
+    pb: getPocketbase(),
 
     flash(name, value) {
       context.state.session.flash(name, value);
@@ -245,10 +249,9 @@ export function getActionCtx(context, action) {
       }
 
       logger.request(
-        ` ▷ ACTION ${actionsModule}.${actionsMethod} ▷ RENDER ${
-          elements.join(
-            ", ",
-          )
+        ` ▷ ACTION ${actionsModule}.${actionsMethod} ▷ RENDER ${elements.join(
+          ", ",
+        )
         }`,
       );
 

@@ -18,6 +18,7 @@ export {
 } from "https://deno.land/x/mongo@v0.31.1/mod.ts";
 export { connect } from "https://deno.land/x/redis@v0.29.2/mod.ts";
 export { setup } from "https://esm.sh/twind@0.16.19";
+export { default as PocketBase } from "npm:pocketbase";
 export * as twColors from "https://esm.sh/twind@0.16.19/colors";
 export { EventEmitter } from "https://deno.land/std@0.177.0/node/events.ts";
 export {

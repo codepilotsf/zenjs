@@ -1,5 +1,6 @@
 /** Generate a 404/500 page using nearest 404/500 template for this request. */
 
+import { kill } from "https://deno.land/std@0.132.0/node/process.ts";
 import { getErrorTemplate, getInitCtx, logger, parseTemplate } from "../mod.js";
 
 export async function error404(context) {

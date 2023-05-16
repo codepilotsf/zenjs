@@ -89,7 +89,7 @@ function getRoutesFromFiles(router) {
     context.state.session.set("_state_", {
       $: ctx.$,
       $meta: ctx.$meta,
-      page: ctx.page,
+      page: ctx.page
     });
     await ctx.next(ctx);
   });

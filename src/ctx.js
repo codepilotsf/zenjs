@@ -12,6 +12,17 @@ export function getInitCtx(context, page) {
   context.request.url.searchParams.forEach((v, k) => (query[k] = v));
   context.request.headers.forEach((v, k) => (headers[k] = v));
 
+  // Make ctx.pocketbase.collection("foo") easily available as ctx.db.foo.
+  const pocketbase = getPocketbase();
+  const dbInit = {};
+  const handler = {
+    get(_target, prop, _receiver) {
+      const collectionName = String(prop);
+      return pocketbase.collection(collectionName);
+    }
+  };
+  const db = new Proxy(dbInit, handler);
+
   const ctx = {
     $: {},
 
@@ -61,7 +72,9 @@ export function getInitCtx(context, page) {
 
     elementsToModify: {},
 
-    pb: getPocketbase(),
+    pocketbase,
+
+    db,
 
     flash(name, value) {
       context.state.session.flash(name, value);
@@ -168,20 +181,33 @@ export function getInitCtx(context, page) {
 }
 
 export function getActionCtx(context, action) {
+  // Make ctx.pocketbase.collection("foo") easily available as ctx.db.foo.
+  const pocketbase = getPocketbase();
+  const dbInit = {};
+  const handler = {
+    get(_target, prop, _receiver) {
+      const collectionName = String(prop);
+      return pocketbase.collection(collectionName);
+    }
+  };
+  const db = new Proxy(dbInit, handler);
+
   // Get the action name from query string.
   const searchParams = {};
   context.request.url.searchParams.forEach((v, k) => (searchParams[k] = v));
   const actionsMethod = Object.keys(searchParams)[0];
   const actionsModule = context.request.url.pathname.slice(3);
 
-  const { $, page, $meta } = context.state.session.get("_state_");
+  const { $, $meta, page } = context.state.session.get("_state_");
 
   const { trigger, lastFocused, payload } = action;
 
   const ctx = {
-    page,
     $,
     $meta,
+    page,
+    pocketbase,
+    db,
     actionsMethod,
     actionsModule,
     trigger,

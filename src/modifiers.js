@@ -41,7 +41,7 @@ export function parseModifiers(dom, ctx) {
     isFalsey(zInvalidValue)
       ? el.classList.remove("invalid")
       : el.classList.add("invalid");
-    el.setAttribute("z-active", isFalsey(zActiveValue) ? "false" : "true");
+    el.setAttribute("z-invalid", isFalsey(zInvalidValue) ? "false" : "true");
   });
 
   // z-disabled

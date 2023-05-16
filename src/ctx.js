@@ -1,5 +1,5 @@
 import { env } from "../deps.js";
-import { getPocketbase } from "./pocketbase.js";
+import { getPocketbaseAndDb } from "./pocketbase.js";
 
 import { getErrorTemplate, logger, parseTemplate } from "../mod.js";
 
@@ -12,16 +12,7 @@ export function getInitCtx(context, page) {
   context.request.url.searchParams.forEach((v, k) => (query[k] = v));
   context.request.headers.forEach((v, k) => (headers[k] = v));
 
-  // Make ctx.pocketbase.collection("foo") easily available as ctx.db.foo.
-  const pocketbase = getPocketbase();
-  const dbInit = {};
-  const handler = {
-    get(_target, prop, _receiver) {
-      const collectionName = String(prop);
-      return pocketbase.collection(collectionName);
-    }
-  };
-  const db = new Proxy(dbInit, handler);
+  const { pb, db } = getPocketbaseAndDb(context);
 
   const ctx = {
     $: {},
@@ -72,7 +63,7 @@ export function getInitCtx(context, page) {
 
     elementsToModify: {},
 
-    pocketbase,
+    pb,
 
     db,
 
@@ -181,16 +172,7 @@ export function getInitCtx(context, page) {
 }
 
 export function getActionCtx(context, action) {
-  // Make ctx.pocketbase.collection("foo") easily available as ctx.db.foo.
-  const pocketbase = getPocketbase();
-  const dbInit = {};
-  const handler = {
-    get(_target, prop, _receiver) {
-      const collectionName = String(prop);
-      return pocketbase.collection(collectionName);
-    }
-  };
-  const db = new Proxy(dbInit, handler);
+  const { pb, db } = getPocketbaseAndDb(context);
 
   // Get the action name from query string.
   const searchParams = {};
@@ -206,7 +188,7 @@ export function getActionCtx(context, action) {
     $,
     $meta,
     page,
-    pocketbase,
+    pb,
     db,
     actionsMethod,
     actionsModule,
@@ -275,9 +257,10 @@ export function getActionCtx(context, action) {
       }
 
       logger.request(
-        ` ▷ ACTION ${actionsModule}.${actionsMethod} ▷ RENDER ${elements.join(
-          ", ",
-        )
+        ` ▷ ACTION ${actionsModule}.${actionsMethod} ▷ RENDER ${
+          elements.join(
+            ", ",
+          )
         }`,
       );
 

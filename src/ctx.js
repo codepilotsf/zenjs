@@ -1,5 +1,5 @@
 import { env } from "../deps.js";
-import { getPocketbaseAndDb } from "./pocketbase.js";
+import { getPB, getPocketbaseAndDb } from "./pocketbase.js";
 
 import { getErrorTemplate, logger, parseTemplate } from "../mod.js";
 
@@ -11,8 +11,6 @@ export function getInitCtx(context, page) {
   const headers = {};
   context.request.url.searchParams.forEach((v, k) => (query[k] = v));
   context.request.headers.forEach((v, k) => (headers[k] = v));
-
-  const { pb, db } = getPocketbaseAndDb(context);
 
   const ctx = {
     $: {},
@@ -63,9 +61,16 @@ export function getInitCtx(context, page) {
 
     elementsToModify: {},
 
-    pb,
+    get pb() {
+      const { pb } = getPocketbaseAndDb(context);
+      console.log("pb-from-ctx:", pb);
+      return pb;
+    },
 
-    db,
+    get db() {
+      const { pb } = getPocketbaseAndDb(context);
+      return pb;
+    },
 
     flash(name, value) {
       context.state.session.flash(name, value);
@@ -172,15 +177,13 @@ export function getInitCtx(context, page) {
 }
 
 export function getActionCtx(context, action) {
-  const { pb, db } = getPocketbaseAndDb(context);
-
   // Get the action name from query string.
   const searchParams = {};
   context.request.url.searchParams.forEach((v, k) => (searchParams[k] = v));
   const actionsMethod = Object.keys(searchParams)[0];
   const actionsModule = context.request.url.pathname.slice(3);
 
-  const { $, $meta, page } = context.state.session.get("_state_");
+  const { $, $meta, page } = context.state.session.get("_state_") || {};
 
   const { trigger, lastFocused, payload } = action;
 
@@ -188,8 +191,6 @@ export function getActionCtx(context, action) {
     $,
     $meta,
     page,
-    pb,
-    db,
     actionsMethod,
     actionsModule,
     trigger,
@@ -214,6 +215,24 @@ export function getActionCtx(context, action) {
     query: $meta.query,
     search: $meta.search,
     secure: $meta.secure,
+
+    get pb() {
+      return this._getPb();
+    },
+
+    async _getPb() {
+      const pb = await getPB(context);
+      return pb;
+    },
+
+    // get db() {
+    //   return this._getDb();
+    // },
+
+    // async _getDb() {
+    //   const { db } = await getPocketbaseAndDb(context);
+    //   return db;
+    // },
 
     flash(name, value) {
       context.state.session.flash(name, value);

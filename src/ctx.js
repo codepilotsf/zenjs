@@ -1,5 +1,4 @@
 import { env } from "../deps.js";
-import { authRefresh, getPocketbaseAndDb } from "./pocketbase.js";
 
 import { getErrorTemplate, logger, parseTemplate } from "../mod.js";
 
@@ -11,9 +10,6 @@ export function getInitCtx(context, page) {
   const headers = {};
   context.request.url.searchParams.forEach((v, k) => (query[k] = v));
   context.request.headers.forEach((v, k) => (headers[k] = v));
-
-  const { pb, db } = getPocketbaseAndDb(context);
-  const { authRefresh } = authRefresh(pb, context);
 
   const ctx = {
     $: {},
@@ -58,28 +54,11 @@ export function getInitCtx(context, page) {
     search: context.request.url.search,
     secure: context.request.secure,
 
-    pb,
-
-    db,
-
-    authRefresh,
-
     page,
 
     session: context.state.session,
 
     elementsToModify: {},
-
-    // get pb() {
-    //   const { pb } = getPocketbaseAndDb(context);
-    //   console.log("pb-from-ctx:", pb);
-    //   return pb;
-    // },
-
-    // get db() {
-    //   const { pb } = getPocketbaseAndDb(context);
-    //   return pb;
-    // },
 
     flash(name, value) {
       context.state.session.flash(name, value);
@@ -196,9 +175,6 @@ export function getActionCtx(context, action) {
 
   const { trigger, lastFocused, payload } = action;
 
-  const { pb, db } = getPocketbaseAndDb(context);
-  const { authRefresh } = authRefresh(pb, context);
-
   const ctx = {
     $,
     $meta,
@@ -227,10 +203,6 @@ export function getActionCtx(context, action) {
     query: $meta.query,
     search: $meta.search,
     secure: $meta.secure,
-
-    pb,
-    db,
-    authRefresh,
 
     flash(name, value) {
       context.state.session.flash(name, value);

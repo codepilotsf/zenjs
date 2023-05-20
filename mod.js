@@ -1,6 +1,6 @@
 export { getErrorTemplate, getRoutes } from "./src/routes.js";
 export { getActionCtx, getInitCtx } from "./src/ctx.js";
-export { getDb } from "./src/db.js";
+export { db } from "./src/db.js";
 export { getNearest } from "./src/nearest.js";
 export { catch500, error404 } from "./src/error.js";
 export { logger } from "./src/logger.js";

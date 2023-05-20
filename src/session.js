@@ -1,9 +1,3 @@
-// import { env, MongoStore, Session } from "../deps.js";
-// import { getDb } from "../mod.ts";
-
-// const db = await getDb();
-// const store = new MongoStore(db, "zenjs_sessions");
-
 import { connect, env, MemoryStore, RedisStore, Session } from "../deps.js";
 import { logger } from "./logger.js";
 

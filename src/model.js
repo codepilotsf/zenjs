@@ -1,20 +1,13 @@
 // Using fastest-validator but considered this one too: https://docs.superstructjs.org
 
-import { ObjectId } from '../deps.js';
-import { getDb, logger, validator } from '../mod.js';
-
-let db;
-try {
-  db = await getDb();
-} catch (_) {
-  /* ignore */
-}
+import { ObjectId } from "../deps.js";
+import { db, logger, validator } from "../mod.js";
 
 export function model(options) {
   // By default, set $$strict to "remove" to disallow props not in schema.
-  if (!options.schema['$$strict']) options.schema.$$strict = 'remove';
+  if (!options.schema["$$strict"]) options.schema.$$strict = "remove";
   if (!db) {
-    logger.error('Unable to use model() without database connection');
+    logger.error("Unable to use model() without database connection");
     return;
   }
   const defaultPropsAndMethods = getDefaultPropsAndMethods(options);
@@ -85,7 +78,7 @@ function getDefaultPropsAndMethods(options) {
       if (!query) return null;
 
       // The update object must not contain the immutable _id field.
-      if (Object.keys(update).includes('_id')) delete update._id;
+      if (Object.keys(update).includes("_id")) delete update._id;
       try {
         const invalid = await this.validatePartial(update);
         if (invalid) return invalid;
@@ -210,7 +203,7 @@ function checkForConflicts(options, defaultPropsAndMethods) {
   for (const key in defaultPropsAndMethods) {
     if (options?.methods && options.methods[key]) {
       logger.error(
-        `Model ${options.collection} cannot have a property or method named ${key}`
+        `Model ${options.collection} cannot have a property or method named ${key}`,
       );
     }
   }
@@ -219,14 +212,14 @@ function checkForConflicts(options, defaultPropsAndMethods) {
 // =========================================
 function convertIdToObjectId(query) {
   // Convert _id string to { _id: <objectid> }
-  if (typeof query === 'string') {
+  if (typeof query === "string") {
     return { _id: new ObjectId(query) };
   } // Or is this an actual ObjectId?
   else if (query instanceof ObjectId) {
     return { _id: query };
   } // Convert object with { _id: string } to { _id: <objectid> }
-  else if (typeof query === 'object') {
-    if (query._id && typeof query._id === 'string') {
+  else if (typeof query === "object") {
+    if (query._id && typeof query._id === "string") {
       query._id = new ObjectId(query._id);
     }
   }
